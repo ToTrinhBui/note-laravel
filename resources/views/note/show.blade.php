@@ -1,9 +1,12 @@
 <x-app-layout>
     <div class="note-container single-note m-auto w-4/5 p-8">
         <div class="note-header flex justify-between py-4">
-            <h1 class="text-[#C7C7C7]">
-                Edited on {{ $note->updated_at->toDayDateTimeString() }}
-            </h1>
+            <div class="note-in4">
+                <h1 class="text-2xl font-bold">{{ $note->title }}</h1>
+                <h3 class="text-sm text-[#C7C7C7]">
+                    Edited on {{ $note->updated_at->toDayDateTimeString() }}
+                </h3>
+            </div>
             <div class="note-buttons flex flex-row-reverse items-center gap-2">
                 <a
                     href="{{ route("note.edit", $note) }}"
@@ -83,7 +86,7 @@
         </div>
         <div class="note">
             <div class="note-body">
-                {{ $note->note }}
+                {!! $note->note !!}
             </div>
         </div>
     </div>

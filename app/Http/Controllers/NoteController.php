@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Note;
+use DOMDocument;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class NoteControler extends Controller
+class NoteController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -33,10 +35,30 @@ class NoteControler extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'note' => ['required', 'string'],
+            'notedata' => ['required'],
+            'title' => ['required'],
         ]);
+
         $data['user_id'] = $request->user()->id;
+        $data['note'] = $data['notedata'];
+        unset($data['notedata']);
+
+        // Get first image in content
+        $dom = new DOMDocument();
+        $dom->loadHTML($data['note']);
+        $images = $dom->getElementsByTagName('img');
+        $firstImage = null;
+        foreach ($images as $image) {
+            $src = $image->getAttribute('src');
+            if (!empty($src) && is_null($firstImage)) {
+                $firstImage = $src;
+                break;
+            }
+        }
+        $data['image_description'] = $firstImage;
+
         $note = Note::create($data);
+
         return to_route('note.show', $note)->with('message', 'Note was created');
     }
 
@@ -45,7 +67,7 @@ class NoteControler extends Controller
      */
     public function show(Note $note)
     {
-        if($note->user_id !== request()->user()->id){
+        if ($note->user_id !== request()->user()->id) {
             abort(403);
         }
         return view('note.show', ['note' => $note]);
@@ -56,7 +78,7 @@ class NoteControler extends Controller
      */
     public function edit(Note $note)
     {
-        if($note->user_id !== request()->user()->id){
+        if ($note->user_id !== request()->user()->id) {
             abort(403);
         }
         return view('note.edit', ['note' => $note]);
@@ -67,13 +89,30 @@ class NoteControler extends Controller
      */
     public function update(Request $request, Note $note)
     {
-        if($note->user_id !== request()->user()->id){
+        if ($note->user_id !== request()->user()->id) {
             abort(403);
         }
 
         $data = $request->validate([
-            'note' => ['required', 'string'],
+            'notedata' => ['required'],
+            'title' => ['required'],
         ]);
+        $data['note'] = $data['notedata'];
+        unset($data['notedata']);
+
+        // Get first image in content
+        $dom = new DOMDocument();
+        $dom->loadHTML($data['note']);
+        $images = $dom->getElementsByTagName('img');
+        $firstImage = null;
+        foreach ($images as $image) {
+            $src = $image->getAttribute('src');
+            if (!empty($src) && is_null($firstImage)) {
+                $firstImage = $src;
+                break;
+            }
+        }
+        $data['image_description'] = $firstImage;
 
         $note->update($data);
 
@@ -85,7 +124,7 @@ class NoteControler extends Controller
      */
     public function destroy(Note $note)
     {
-        if($note->user_id !== request()->user()->id){
+        if ($note->user_id !== request()->user()->id) {
             abort(403);
         }
         $note->delete();

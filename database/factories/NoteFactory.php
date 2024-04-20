@@ -16,9 +16,12 @@ class NoteFactory extends Factory
      */
     public function definition(): array
     {
+        $note_content = fake()->realText(2000);
+        $note = "<p>{$note_content}</p>";
         return [
-            'note' => fake()->realText(2000),
+            'note' => $note,
             'user_id' => 1,
+            'title' => fake()->realTextBetween(5, 15),
         ];
     }
 }
